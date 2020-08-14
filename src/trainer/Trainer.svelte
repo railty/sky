@@ -99,6 +99,7 @@
 				let rc = await callServer('DELETE', "/trainers/"+item.id);
 				notify(rc.code, rc.message);
 				if (rc.code=="success") await refreshData();
+				selectedIdx = -1;
 			}
 		}
 	}
