@@ -1,0 +1,6 @@
+1. control table display on server/controller, send headers info down to client, include columns hide (users.id, trainers.id), order by name (entries.id instead of id), also change sortBy to orderBy
+2. add winsten log
+
+
+
+

@@ -1,0 +1,134 @@
+@layout('master')
+
+@section('content')
+  <div class="box">
+    <h2 class="title">
+      Entries[{{entries.length}}]
+    </h2>
+  
+    <div id="profile" style="margin: 0 20px;">
+  	  <b id="profile_name" class="name"></b><br/>
+	    <i id="profile_email" class="email"></i>
+    </div>
+    <div class="g-signin2" data-onsuccess="onSignIn"></div>
+    <a href="#" onclick="onSignOut();">Sign out</a>
+  </div>
+  
+  <button id="btnExport" class="button is-primary" onclick="exportClicked(event)">Export</button>
+  <div id="notification"></div>
+  
+  <table class='table is-bordered'>
+    <thead>
+      <th>Trainer</th>
+      <th>User</th>
+      <th>Client</th>
+      <th>Time</th>
+      <th>Amount</th>
+      <th>Method</th>
+      <th>Edit</th>
+      <th>Delete</th>
+    </thead>
+    <tbody>
+      @each(entry in entries)
+        <tr>
+          <td><a href='entries/{{{ entry.id }}}'>{{ entry.trainerName }}</a></td>
+          <td><a href='entries/{{{ entry.id }}}'>{{ entry.userName }}</a></td>
+          <td><a href='entries/{{{ entry.id }}}'>{{ entry.client }}</a></td>
+          <td><a href='entries/{{{ entry.id }}}'>{{ entry.time }}</a></td>
+          <td><a href='entries/{{{ entry.id }}}'>{{ entry.amount }}</a></td>
+          <td><a href='entries/{{{ entry.id }}}'>{{ entry.method }}</a></td>
+          <td><a href='entries/{{{ entry.id }}}/edit'>Edit</a></td>
+          <td><a href='entries/{{{ entry.id }}}/delete' data='Are you sure?' onclick="return deleteRow(event)">Delete</a></td>
+        </tr>
+        <div>  </div>
+      </tr>
+      @endeach
+    </tbody>
+  </table>
+
+  @include( './entry/_form')
+  <script>
+    function exportClicked(e){
+      if (e.ctrlKey) {
+        test();
+      }
+      else {
+        exportExcel();
+      }
+    }
+    
+    function setSpinnerActive(isActive) {
+      let btn = document.getElementById("btnExport");
+
+      if (isActive) {
+        btn.classList.add('is-loading');
+      } else {
+        btn.classList.remove('is-loading');
+      }
+    }
+
+    function test(){
+      console.log("testing");
+      setSpinnerActive(true);
+      setTimeout(()=>{
+        setSpinnerActive(false);
+      }, 1000);
+    }
+
+    function exportExcel(){
+      console.log("export");
+      setSpinnerActive(true);
+      var auth = gapi.auth2.getAuthInstance();
+      if (auth.isSignedIn.get()) {
+        let accessToken = auth.currentUser.get().getAuthResponse().access_token;
+        setSpinnerActive(true);
+
+        let http = new XMLHttpRequest();
+        http.open("POST", '/entries/export', true);
+        http.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        http.setRequestHeader("Accept", "application/json");
+        http.setRequestHeader('Authorization', 'Bearer ' + accessToken);
+
+        http.onreadystatechange = function() { //Call a function when the state changes.
+          if(http.readyState == 4 && http.status == 200) {
+            var rc = JSON.parse(http.responseText);
+            console.log("exported " + rc.message);
+            setSpinnerActive(false);
+
+            let htmlNotification = "<div class='notification is-" + rc.code + "'>" + rc.message + "</div>";
+            let divNotification = document.getElementById("notification");
+            divNotification.innerHTML = htmlNotification;
+            setTimeout(()=>{
+              divNotification.innerHTML = "";
+            }, 2000);
+          }
+        }
+      
+        var data = {
+          '_csrf': '{{ csrfToken }}',
+        };
+
+        var params = JSON.stringify(data);
+        http.send(params);
+      }
+      else{
+        console.log('Signin required.');
+      }
+    }
+
+    function onSignIn(user) {
+      var profile = user.getBasicProfile();
+      document.getElementById("profile_name").innerHTML=profile.getName();
+      document.getElementById("profile_email").innerHTML = profile.getEmail();
+    }
+    
+    function onSignOut() {
+      var auth2 = gapi.auth2.getAuthInstance();
+      auth2.signOut().then(function () {
+        console.log('User signed out.');
+        document.getElementById("profile_name").innerHTML="signed out";
+        document.getElementById("profile_email").innerHTML = '';
+      });
+    }
+  </script>
+@endsection

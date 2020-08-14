@@ -1,0 +1,12 @@
+@layout('public')
+
+@section('content')
+  <div id="app"></div>
+  <link rel='stylesheet' href='/build/entryPublic.css'>
+  <script defer src='/build/entryPublic.js'></script>
+
+  <script>
+    let csrf = '{{ csrfToken }}';
+  </script>
+  
+@endsection

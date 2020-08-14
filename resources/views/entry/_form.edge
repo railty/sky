@@ -1,0 +1,169 @@
+  <div class="field">
+    <label class="label">Trainer</label>
+    <div class="control">
+      <div class="select">
+        <select id="trainer_id">
+          <option value=""> Please Select </option>
+          @each(trainer in trainers)
+            <option value={{trainer.id}}> {{ trainer.name }} </option>
+          @endeach
+        </select>
+      </div>      
+    </div>
+  </div>
+
+  <div class="field">
+    <label class="label">Staff</label>
+    <div class="control">
+      <div class="select">
+        <select id="user_id">
+          <option value=""> Please Select </option>
+          @each(user in users)
+            <option value={{user.id}}> {{ user.username }} </option>
+          @endeach
+        </select>
+      </div>      
+    </div>
+  </div>
+
+  <div class="field">
+    <label class="label">Client</label>
+    <div class="control">
+      <input id="client" class="input" type="text" placeholder="Text input">
+    </div>
+  </div>
+  <!--
+  <div class="field">
+    <label class="label">Time</label>
+    <div class="control">
+        <input type="time" id="time" min="2020-01-01T00:00" step="900" value={{Time}}>
+    </div>
+  </div>
+  -->
+
+  <div class="field">
+  <label class="label">Time</label>
+    <div class="control">
+      @if(includeDate)
+        <div class="select">
+          <input id="date" class="input" type="text" value='{{date}}'>
+        </div>
+      @else
+          <input id="date" class="input" type="hidden" value='{{date}}'>
+      @endif
+
+      <div class="select">
+        <select id="hour">
+          @each(h in range(12))
+            <option value={{h+1}}> {{ h+1 }} </option>
+          @endeach
+        </select>
+      </div>      
+
+      <div class="select">
+        <select id="minute">
+          @each(min in ['00', '15', '30', '45'])
+            <option value={{min}}> {{ min }} </option>
+          @endeach
+        </select>
+      </div>      
+
+      <div class="select">
+        <select id="ampm">
+          @each(ampm in ['AM', 'PM'])
+            <option value={{ampm}}> {{ ampm }} </option>
+          @endeach
+        </select>
+      </div>      
+
+    </div>
+  </div>
+
+  <div class="field">
+    <label class="label">Amount</label>
+    <div class="control">
+      <input id="amount" class="input" type="text" value="15">
+    </div>
+  </div>
+
+  <div class="field">
+    <label class="label">Method of Payment</label>
+    <div class="control">
+      <div class="select">
+        <select id="method">
+          <option value='cash'> Cash </option>
+          <option value='credit'> Credit </option>
+          <option value='debit'> Debit </option>
+        </select>
+      </div>      
+    </div>
+  </div>
+
+  <div class="field is-grouped">
+    <div class="control">
+      <button class="button is-link" onClick="save()">Submit</button>
+    </div>
+    <div class="control">
+      <button class="button is-link is-light">Cancel</button>
+    </div>
+  </div>
+  <div id="submit-notification"></div>
+
+
+  <script>
+    function save(){
+
+      let trainer_id = document.getElementById("trainer_id").value;
+      /*
+      let trainer = document.getElementById("trainer");
+		if(!trainer.validity.valid) {
+			notify('warning', "trainer is required!");
+			return;
+		}
+*/
+
+      var http = new XMLHttpRequest();
+      http.open("POST", '/entries', true);
+      http.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+      http.setRequestHeader("Accept", "application/json");
+      
+      http.onreadystatechange = function() { //Call a function when the state changes.
+        if(http.readyState == 4 && http.status == 200) {
+          var rc = JSON.parse(http.responseText);
+          console.log("saved id = " + rc.id);
+
+          let htmlNotification = "<div class='notification is-" + rc.code + "'>" + rc.message + "</div>";
+          let divNotification = document.getElementById("submit-notification");
+          divNotification.innerHTML = htmlNotification;
+          setTimeout(()=>{
+            divNotification.innerHTML = "";
+            location.reload();
+          }, 2000);
+        }
+      }
+
+      let user_id = document.getElementById("user_id").value;
+      let client = document.getElementById("client").value;
+      let amount = document.getElementById("amount").value;
+      let method = document.getElementById("method").value;
+
+      let date = document.getElementById("date").value;
+      let hour = document.getElementById("hour").value;
+      let minute = document.getElementById("minute").value;
+      let ampm = document.getElementById("ampm").value;
+      let time = date + " " + hour + ":" + minute + ampm;
+
+      var data = {
+        '_csrf': '{{ csrfToken }}',
+        trainer_id: trainer_id,
+        user_id: user_id,
+        amount: amount,
+        client: client,
+        method: method,
+        time: time
+      };
+
+      var params = JSON.stringify(data);
+      http.send(params);
+    }
+  </script>
