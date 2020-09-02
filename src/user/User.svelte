@@ -100,6 +100,7 @@
 				let rc = await callServer('DELETE', "/users/"+item.id);
 				notify(rc.code, rc.message);
 				if (rc.code=="success") await refreshData();
+				selectedIdx = -1;
 			}
 		}
 	}

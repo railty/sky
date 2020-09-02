@@ -105,7 +105,8 @@ class Entry extends Model {
     
         entries = entries.rows.map((e)=>{
             e.trainerName = e.getRelated("trainer").name;
-            e.userName = e.getRelated("user").username;
+            let user = e.getRelated("user");
+            if (user) e.userName = user.username;
             return e;
         });
     

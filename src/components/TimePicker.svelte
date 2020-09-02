@@ -16,7 +16,7 @@
             let tm2 = ((tm1/dm).toFixed())*dm;
             tm = moment.unix(tm2);	//round to the closest 15 minutes
 		}
-		date = tm.format("YYYY-MM-DD");
+        date = tm.format("YYYY-MM-DD");
 		hour = tm.format("hh");
 		minute = tm.format("mm");
 		ampm = tm.format("A");
@@ -32,7 +32,6 @@
 	export let time;
 
 </script>
-
 <div>
     {#if showDate}
         <input id="date" class="input" type="date" min="2020-01-01" bind:value={date}>
