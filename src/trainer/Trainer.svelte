@@ -107,6 +107,62 @@
 		page = p;
 		await refreshData();
 	}
+	let profile = null;
+	window.updateProfile = function(p){
+		profile = p;
+	}
+
+    function onSignIn(user) {
+      	profile = user.getBasicProfile();
+    }
+    
+    function onSignOut() {
+		profile = null;		
+	  
+	 	let auth2 = gapi.auth2.getAuthInstance();
+      	auth2.signOut().then(function () {
+        	console.log('User signed out.');
+      	});
+    }
+
+    function exportExcel(){
+      console.log("export");
+      let auth = gapi.auth2.getAuthInstance();
+      if (auth.isSignedIn.get()) {
+        let accessToken = auth.currentUser.get().getAuthResponse().access_token;
+
+        let http = new XMLHttpRequest();
+        http.open("POST", '/trainers/export', true);
+        http.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        http.setRequestHeader("Accept", "application/json");
+        http.setRequestHeader('Authorization', 'Bearer ' + accessToken);
+
+        http.onreadystatechange = function() { //Call a function when the state changes.
+          if(http.readyState == 4 && http.status == 200) {
+            var rc = JSON.parse(http.responseText);
+            console.log("exported " + rc.message);
+
+            let htmlNotification = "<div class='notification is-" + rc.code + "'>" + rc.message + "</div>";
+            let divNotification = document.getElementById("notification");
+            divNotification.innerHTML = htmlNotification;
+            setTimeout(()=>{
+              divNotification.innerHTML = "";
+            }, 2000);
+          }
+        }
+      
+        var data = {
+          '_csrf': csrf,
+        };
+
+        var params = JSON.stringify(data);
+        http.send(params);
+      }
+      else{
+        console.log('Signin required.');
+      }
+    }
+
 </script>
 
 <div class="columns">
@@ -143,6 +199,17 @@
 		</div>
   </div>
 </div>
+
+<div class="g-signin2" data-onsuccess="onSignIn" style="visibility: {profile ? 'hidden': 'visible'};"></div>
+
+{#if profile}
+	<div id="profile" style="margin: 0 20px;">
+		<b id="profile_name" class="name"></b><br/>
+		<i id="profile_email" class="email"></i>
+	</div>	
+	<button id="btnExport" class="button is-primary" on:click={exportExcel}>Export</button>
+	<button class="button is-primary" on:click={onSignOut}>Signout</button>
+{/if}
 
 <style>
 	* {

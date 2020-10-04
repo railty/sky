@@ -148,6 +148,21 @@ class EntryController extends ItemController {
         return true;
     }
 
+    async delete({request, response}) {
+        let itemId = request.params.id;
+        if (itemId) await super.delete({request, response});
+        else{
+            const result = await Database.raw("delete from entries where updated_at < datetime('now', '-1 month');");
+        
+            let code;
+            let message;
+            code = 'success';
+            message = this.itemName() + " deleted"
+    
+            response.send(JSON.stringify({code: code, message: message}));
+        }
+    }    
+
     async public({request, response, view}) {
         if (request.url().match(/\.json$/)){
             const trainers = (await Trainer.query().orderBy("name").fetch()).rows;

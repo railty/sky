@@ -5,8 +5,16 @@
   <link rel='stylesheet' href='/build/trainer.css'>
   <script defer src='/build/trainer.js'></script>
 
+  <script src="https://apis.google.com/js/platform.js?onload=gapiInit" async defer></script>
   <script>
     let csrf = '{{ csrfToken }}';
+    function gapiInit() {
+      gapi.auth2.getAuthInstance().isSignedIn.listen((isSignedIn)=>{
+        if (isSignedIn){
+          updateProfile(gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile());
+        }
+      });
+    }
   </script>
-  
+
 @endsection

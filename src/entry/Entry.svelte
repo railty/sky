@@ -212,6 +212,15 @@
       }
     }
 
+
+		async function RemoveHistory(){
+			if (confirm("Are you sure?")){
+				let rc = await callServer('DELETE', "/entries/");
+				notify(rc.code, rc.message);
+				if (rc.code=="success") await refreshData();
+				selectedIdx = -1;
+			}
+		}
 </script>
 
 <div class="columns">
@@ -240,6 +249,8 @@
 	</div>	
 	<button id="btnExport" class="button is-primary" on:click={exportExcel}>Export</button>
 	<button class="button is-primary" on:click={onSignOut}>Signout</button>
+
+	<button id="btnDelete" class="button is-danger is-pulled-right" on:click={RemoveHistory}>Delete</button>
 {/if}
 
 <style>
