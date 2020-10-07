@@ -248,11 +248,11 @@
 		<i id="profile_email" class="email"></i>
 	</div>	
 	<button id="btnExport" class="button is-primary" on:click={exportExcel}>Export</button>
-	<button class="button is-primary" on:click={onSignOut}>Signout</button>
+	<button class="button is-primary" on:click={onSignOut}>Signout {profile.getEmail()}</button>
 
 	<button id="btnDelete" class="button is-danger is-pulled-right" on:click={RemoveHistory}>Delete</button>
 {/if}
-
+<hr />
 <style>
 	* {
 		box-sizing: border-box;

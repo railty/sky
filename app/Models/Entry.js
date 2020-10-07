@@ -2,6 +2,7 @@
 
 /** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
 const Model = use('Model')
+const Database = use('Database');
 
 class Entry extends Model {
     static headers = [
@@ -101,14 +102,17 @@ class Entry extends Model {
     }
 
     static async getGoogleSheetUpdateRows() {
+        /*
+        //this kind of with is using "in" to generate sql, which has a length limit
         let entries = await this.query().with('trainer').with('user').fetch();
-    
         entries = entries.rows.map((e)=>{
             e.trainerName = e.getRelated("trainer").name;
             let user = e.getRelated("user");
             if (user) e.userName = user.username;
             return e;
         });
+        */
+        let entries = await Database.raw("select time, trainers.name as trainerName, users.username as userName, client, amount, method from entries join trainers on entries.trainer_id=trainers.id join users on entries.user_id=users.id");
     
         let requests = entries.map(function(entry){
             let cells = this.headers.map(function(column) {
